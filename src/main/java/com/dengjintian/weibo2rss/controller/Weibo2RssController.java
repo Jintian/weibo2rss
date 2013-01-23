@@ -2,6 +2,8 @@ package com.dengjintian.weibo2rss.controller;
 
 import java.io.IOException;
 import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.dengjintian.weibo2rss.misc.RedisService;
 import com.dengjintian.weibo2rss.weibo4j.Oauth;
@@ -46,9 +49,10 @@ public class Weibo2RssController {
 
     @RequestMapping(value = "/generate/{userId}", method = RequestMethod.GET)
     public ModelAndView generateRss(@PathVariable("userId")
-    String userId, HttpServletResponse response) throws IOException {
+    String userId, HttpServletResponse response, HttpServletRequest request) throws IOException {
         if (StringUtils.isBlank(ACCESS_TOKEN)) {
             ModelAndView modelAndView = new ModelAndView("redirect:/");
+            request.getSession().setAttribute("originalUserId", userId);
             return modelAndView;
         }
 
@@ -64,18 +68,20 @@ public class Weibo2RssController {
 
     @RequestMapping(value = "/callback")
     public ModelAndView callback(@RequestParam("code")
-    String code) {
-
+    String code, HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView();
         try {
             AccessToken accessTokens = oauth.getAccessTokenByCode(code);
             ACCESS_TOKEN = accessTokens.getAccessToken();
             redisService.setAccessToken(ACCESS_TOKEN);
-            modelAndView.addObject("result", "success!");
+            String userId = (String) request.getSession().getAttribute("originalUserId");
+            if (!StringUtils.isBlank(userId)) {
+                modelAndView.setView(new RedirectView("generate/" + userId));
+            } else modelAndView.addObject("result", "success!");
         } catch (WeiboException e) {
             logger.error("Fail to retrieve accessToken with code(" + code + ")!", e);
-            modelAndView.addObject("result", "fail!");
+            modelAndView.addObject("result", "fail! \n" + e);
         }
         return modelAndView;
-    };
+    }
 }

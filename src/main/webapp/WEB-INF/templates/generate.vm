@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
      xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+     xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
         >
     <channel>
-        <atom:link href="http://weibo2rss.cloudfoundry.com/generate/$!user.id" rel="self" type="application/rss+xml" />
         <title>$!user.screenName @新浪微博</title>
-        <link>
-        http://weibo.com/$!user.id</link>
+        <link>http://weibo.com/$!user.id</link>
         <description>新浪微博RSS实时生成</description>
         <language>zh-cn</language>
-        <copyright>By http://weibo.com/jintiandeng</copyright>
+        <sy:updatePeriod>hourly</sy:updatePeriod>
+        <sy:updateFrequency>1</sy:updateFrequency>
+        <generator>http://weibo2rss.cloudfoundry.com</generator>
+        <atom:link href="http://weibo2rss.cloudfoundry.com/generate/$!user.id" rel="self" type="application/rss+xml" />
         <image>
             <url>$!user.avatarLarge</url>
             <title>$!user.screenName @新浪微博</title>
-            <link>
-            http://weibo.com/$!user.id</link>
+            <link>http://weibo.com/$!user.id</link>
         </image>
 
 
         #foreach( $!status in $statusList )
+            #set ( $url = "http://api.t.sina.com.cn/$!user.id/statuses/"+$!status.id )
             <item>
                 <title><![CDATA[
                     #if( $!status.text.length()>10)
@@ -27,17 +33,19 @@
                         $!status.text
                     #end
                     ]]></title>
-                <link>http://api.t.sina.com.cn/$!user.id/statuses/$!status.id</link>
+                <link> $url </link>
+                <guid>$url</guid>
+                <comments>$url</comments>
                 <pubDate>$date.format("E, dd MMM yyyy HH:mm:ss Z",$!status.createdAt)</pubDate>
-                <guid> http://api.t.sina.com.cn/$!user.id/statuses/$!status.id</guid>
-                <description><![CDATA[
-                    $!status.text
+                <description><![CDATA[$!status.text
                     #if( $StringUtils.isNotBlank($!status.originalPic) )
                         <br/>
                         <a href="$!status.originalPic" title="点击看原图" target="_blank">
                             <img src="$!status.originalPic" border=0/>
                         </a>
                     #end
+                    <br/>
+                    <a href="$url">More...</a>
                     ]]>
                 </description>
             </item>
