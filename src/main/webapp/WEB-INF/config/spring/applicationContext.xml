@@ -18,6 +18,7 @@
     <!--<cloud:properties id="cfoundryEnv"/>-->
     <!--<context:property-placeholder properties-ref="cfoundryEnv"/>-->
 
+    <mvc:resources mapping="/assets/**" location="/assets/" />
 
     <mvc:annotation-driven/>
 
@@ -48,7 +49,7 @@
         <!--<property name="password" value="${cloud.services.weibo2rss.connection.password}"></property>-->
         <!--<property name="port" value="${cloud.services.weibo2rss.connection.port}"></property>-->
         <property name="hostName" value="localhost" />
-        <property name="port" value="12121" />
+        <property name="port" value="6379" />
     </bean>
 
     <bean id="redisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">

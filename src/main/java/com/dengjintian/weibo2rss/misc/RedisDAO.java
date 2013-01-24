@@ -11,7 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import com.dengjintian.weibo2rss.weibo4j.model.Status;
 
 /**
- * User: jintian, Date: 8/1/13
+ * User: jintian.deng, Date: 8/1/13
  */
 public class RedisDAO {
 

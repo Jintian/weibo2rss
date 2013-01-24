@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,10 +26,10 @@ import com.dengjintian.weibo2rss.weibo4j.model.WeiboException;
  * User: jintian, Date: 7/1/13
  */
 @Controller
-public class Weibo2RssController  {
+public class Weibo2RssController {
 
-    private static final Logger logger       = LoggerFactory.getLogger(Weibo2RssController.class);
-    private static Oauth        oauth        = new Oauth();
+    private static final Logger logger = LoggerFactory.getLogger(Weibo2RssController.class);
+    private static Oauth        oauth  = new Oauth();
     @Autowired
     RedisService                redisService;
 
@@ -38,17 +37,31 @@ public class Weibo2RssController  {
     public ModelAndView index() {
         ModelAndView modelAndView = new ModelAndView("index");
         modelAndView.addObject("userCount", redisService.getUserCount());
-        if(StringUtils.isBlank(redisService.getAccessToken()))
-            modelAndView.addObject("needOauth",true);
+        if (StringUtils.isBlank(redisService.getAccessToken())) modelAndView.addObject("needOauth", true);
         return modelAndView;
     }
 
-    @RequestMapping(value = "/oauth", method = RequestMethod.POST)
+    /**
+     * 重导向到weibo进行oauth认证.
+     * 
+     * @return
+     * @throws WeiboException
+     */
+    @RequestMapping(value = "/oauth", method = RequestMethod.GET)
     public String oauth() throws WeiboException {
         return "redirect:" + oauth.authorize("code", "weibo2rss", "friendships_groups_read,statuses_to_me_read");
     }
 
-    @RequestMapping(value = "/generate/{userId}", method = RequestMethod.GET)
+    /**
+     * 生成rss.
+     * 
+     * @param userId
+     * @param response
+     * @param request
+     * @return
+     * @throws IOException
+     */
+    @RequestMapping(value = "/rss/{userId}", method = RequestMethod.GET)
     public ModelAndView generateRss(@PathVariable("userId")
     String userId, HttpServletResponse response, HttpServletRequest request) throws IOException {
         if (StringUtils.isBlank(redisService.getAccessToken())) {
@@ -67,13 +80,26 @@ public class Weibo2RssController  {
 
     }
 
+    @RequestMapping(value = "/generate")
+    public ModelAndView formHandling(@RequestParam("userId")
+    String userId) {
+        return new ModelAndView(new RedirectView("/rss/" + userId));
+    }
+
+    /**
+     * weibo oauth认证后回调.
+     * 
+     * @param code
+     * @param request
+     * @return
+     */
     @RequestMapping(value = "/callback")
     public ModelAndView callback(@RequestParam("code")
     String code, HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView();
         try {
             AccessToken accessTokens = oauth.getAccessTokenByCode(code);
-            logger.warn("accessTokens expires in "+accessTokens.getExpireIn());
+            logger.warn("accessTokens expires in " + accessTokens.getExpireIn());
             redisService.saveAccessToken(accessTokens.getAccessToken());
             String userId = (String) request.getSession().getAttribute("originalUserId");
             if (!StringUtils.isBlank(userId)) {
