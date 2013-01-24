@@ -1,7 +1,6 @@
 package com.dengjintian.weibo2rss.controller;
 
 import java.io.IOException;
-import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -9,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,18 +27,19 @@ import com.dengjintian.weibo2rss.weibo4j.model.WeiboException;
  * User: jintian, Date: 7/1/13
  */
 @Controller
-public class Weibo2RssController {
+public class Weibo2RssController  {
 
     private static final Logger logger       = LoggerFactory.getLogger(Weibo2RssController.class);
     private static Oauth        oauth        = new Oauth();
     @Autowired
     RedisService                redisService;
-    private String              ACCESS_TOKEN = null;
 
     @RequestMapping(value = { "/index", "/" })
     public ModelAndView index() {
         ModelAndView modelAndView = new ModelAndView("index");
-        modelAndView.addObject("tmp", new Date());
+        modelAndView.addObject("userCount", redisService.getUserCount());
+        if(StringUtils.isBlank(redisService.getAccessToken()))
+            modelAndView.addObject("needOauth",true);
         return modelAndView;
     }
 
@@ -50,7 +51,7 @@ public class Weibo2RssController {
     @RequestMapping(value = "/generate/{userId}", method = RequestMethod.GET)
     public ModelAndView generateRss(@PathVariable("userId")
     String userId, HttpServletResponse response, HttpServletRequest request) throws IOException {
-        if (StringUtils.isBlank(ACCESS_TOKEN)) {
+        if (StringUtils.isBlank(redisService.getAccessToken())) {
             ModelAndView modelAndView = new ModelAndView("redirect:/");
             request.getSession().setAttribute("originalUserId", userId);
             return modelAndView;
@@ -72,8 +73,8 @@ public class Weibo2RssController {
         ModelAndView modelAndView = new ModelAndView();
         try {
             AccessToken accessTokens = oauth.getAccessTokenByCode(code);
-            ACCESS_TOKEN = accessTokens.getAccessToken();
-            redisService.setAccessToken(ACCESS_TOKEN);
+            logger.warn("accessTokens expires in "+accessTokens.getExpireIn());
+            redisService.saveAccessToken(accessTokens.getAccessToken());
             String userId = (String) request.getSession().getAttribute("originalUserId");
             if (!StringUtils.isBlank(userId)) {
                 modelAndView.setView(new RedirectView("generate/" + userId));
@@ -84,4 +85,5 @@ public class Weibo2RssController {
         }
         return modelAndView;
     }
+
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
@@ -19,7 +20,7 @@ import com.dengjintian.weibo2rss.weibo4j.org.json.JSONObject;
 /**
  * User: jintian, Date: 8/1/13
  */
-public class RedisService {
+public class RedisService implements InitializingBean {
 
     private static final Logger   logger          = Logger.getLogger(RedisService.class);
     private static final Timeline timeline        = new Timeline();
@@ -80,9 +81,9 @@ public class RedisService {
     }
 
     private String getNewestStatusIdFromCache(String userId) {
-        List<Status> result = redisDAO.getNewestUserStatusByUserId(userId);
+        List<Object> result = redisDAO.getNewestUserStatusByUserId(userId);
         if (CollectionUtils.isEmpty(result)) return "";
-        else return result.get(0).getId();
+        else return ((Status) result.get(0)).getId();
     }
 
     private String getNewestStatusIdFromWeibo(String userId) {
@@ -95,7 +96,7 @@ public class RedisService {
         return "";
     }
 
-    public List<Status> getStatuses(String userId) {
+    public List<Object> getStatuses(String userId) {
         return redisDAO.getUserStatusesByUserId(userId);
     }
 
@@ -108,9 +109,28 @@ public class RedisService {
         return null;
     }
 
+    public int getUserCount() {
+        return redisDAO.getUserCount();
+    }
+
+    public void saveAccessToken(String accessToken) {
+        redisDAO.saveAccessToken(accessToken);
+        this.setAccessToken(accessToken);
+    }
+
+    public String getAccessToken() {
+        return redisDAO.getAccessToken();
+    }
+
     public void setAccessToken(String accessToken) {
         timeline.client.setToken(accessToken);
         users.setToken(accessToken);
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (StringUtils.isNotBlank(redisDAO.getAccessToken())) {
+            this.setAccessToken(redisDAO.getAccessToken());
+        }
+    }
 }

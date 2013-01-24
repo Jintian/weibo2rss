@@ -4,9 +4,11 @@
     <meta charset="utf-8" />
 </head>
     <body>
-
-        <form action="/oauth" method="post">
-            <input type="submit" value="Oauth授权">
-        </form>
+        Welcome to weibo2rss, used by $!userCount people! <br />
+        #if($!needOauth == true)
+            <form action="/oauth" method="post">
+                <input type="submit" value="Oauth授权">
+            </form>
+        #end
     </body>
 </html>

@@ -8,7 +8,6 @@ package com.dengjintian.weibo2rss.misc;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
 
 import com.alibaba.fastjson.JSON;
@@ -19,29 +18,31 @@ import com.dengjintian.weibo2rss.weibo4j.model.Status;
  * 
  * @author: jintian, Date: 13/1/13
  */
-public class StatusRedisSerializer implements RedisSerializer<Status> {
+public class RedisSerializer implements org.springframework.data.redis.serializer.RedisSerializer {
 
-    private static final Logger logger = LoggerFactory.getLogger(StatusRedisSerializer.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisSerializer.class);
 
     @Override
-    public byte[] serialize(Status status) throws SerializationException {
-        if (status != null) {
+    public byte[] serialize(Object obj) throws SerializationException {
+        if (obj != null) {
             try {
-                return JSON.toJSONString(status).getBytes("UTF-8");
+                if (obj instanceof Status) return JSON.toJSONString(obj).getBytes("UTF-8");
+                else if (obj instanceof String) return obj.toString().getBytes("UTF-8");
             } catch (Exception e) {
-                logger.error("Fail to convert status(" + ToStringBuilder.reflectionToString(status) + ") to byte[]!", e);
+                logger.error("Fail to convert status(" + ToStringBuilder.reflectionToString(obj) + ") to byte[]!", e);
             }
         }
         return null;
     }
 
     @Override
-    public Status deserialize(byte[] bytes) throws SerializationException {
+    public Object deserialize(byte[] bytes) throws SerializationException {
         if (bytes != null) {
             String tmp = "";
             try {
                 tmp = new String(bytes, "UTF-8");
-                return (Status) JSON.parseObject(tmp, Status.class);
+                if (tmp.startsWith("{")) return (Status) JSON.parseObject(tmp, Status.class);
+                else return tmp;
             } catch (Exception e) {
                 logger.error("Fail to convert json string(" + tmp + ") to status!", e);
             }

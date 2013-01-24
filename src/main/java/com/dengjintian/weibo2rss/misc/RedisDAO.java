@@ -15,17 +15,16 @@ import com.dengjintian.weibo2rss.weibo4j.model.Status;
  */
 public class RedisDAO {
 
-    private static final Logger logger = LoggerFactory.getLogger(RedisDAO.class);
-
+    private static final Logger   logger = LoggerFactory.getLogger(RedisDAO.class);
     @Autowired
-    RedisTemplate<String, Status> redisTemplate;
+    RedisTemplate<String, Object> redisTemplate;
 
-    public List<Status> getUserStatusesByUserId(String userId) {
-        logger.warn(userId+" has "+redisTemplate.opsForList().size(userId)+" statuses!");
+    public List<Object> getUserStatusesByUserId(String userId) {
+        logger.warn(userId + " has " + redisTemplate.opsForList().size(userId) + " statuses!");
         return redisTemplate.opsForList().range(userId, 0, -1);
     }
 
-    public List<Status> getNewestUserStatusByUserId(String userId) {
+    public List<Object> getNewestUserStatusByUserId(String userId) {
         return redisTemplate.opsForList().range(userId, 0, 0);
     }
 
@@ -37,10 +36,11 @@ public class RedisDAO {
             updateUserStatus(userId, status);
         }
 
-        //remove outdated
-        long removeCounter=redisTemplate.opsForList().size(userId)-200;
-        if(removeCounter>0){
-          for(int i=0;i<=removeCounter;i++){}
+        // remove outdated
+        long removeCounter = redisTemplate.opsForList().size(userId) - 200;
+        if (removeCounter > 0) {
+            for (int i = 0; i <= removeCounter; i++) {
+            }
             redisTemplate.opsForList().rightPop(userId);
         }
     }
@@ -48,4 +48,17 @@ public class RedisDAO {
     public void updateUserStatus(String userId, Status status) {
         redisTemplate.opsForList().leftPush(userId, status);
     }
+
+    public int getUserCount() {
+        return redisTemplate.keys("*").size();
+    }
+
+    public void saveAccessToken(String accessToken) {
+        redisTemplate.opsForValue().set("accessToken", accessToken);
+    }
+
+    public String getAccessToken() {
+        return (String) redisTemplate.opsForValue().get("accessToken");
+    }
+
 }

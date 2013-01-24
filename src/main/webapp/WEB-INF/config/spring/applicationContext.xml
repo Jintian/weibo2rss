@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:cloud="http://schema.cloudfoundry.org/spring"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://schema.cloudfoundry.org/spring
+       http://schema.cloudfoundry.org/spring/cloudfoundry-spring.xsd">
+
+    <!--explicitly use cloudfoundry service -->
+    <!--<cloud:properties id="cfoundryEnv"/>-->
+    <!--<context:property-placeholder properties-ref="cfoundryEnv"/>-->
+
+
+    <mvc:annotation-driven/>
+
+    <context:component-scan base-package="com.dengjintian.weibo2rss.controller"/>
+
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
+        <property name="cache" value="true"/>
+        <property name="prefix" value=""/>
+        <property name="suffix" value=".vm"/>
+        <property name="contentType" value=""/>
+        <property name="toolboxConfigLocation" value="/WEB-INF/config/velocity/tools.xml" />
+    </bean>
+
+    <bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
+        <property name="resourceLoaderPath" value="/WEB-INF/templates/"/>
+        <property name="velocityProperties">
+            <props>
+                <prop key="input.encoding">UTF-8</prop>
+                <prop key="output.encoding">UTF-8</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!--redis-->
+    <bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <!--<property name="hostName" value="${cloud.services.weibo2rss.connection.hostname}"></property>-->
+        <!--<property name="password" value="${cloud.services.weibo2rss.connection.password}"></property>-->
+        <!--<property name="port" value="${cloud.services.weibo2rss.connection.port}"></property>-->
+        <property name="hostName" value="localhost" />
+        <property name="port" value="12121" />
+    </bean>
+
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">
+        <property name="connectionFactory" ref="connectionFactory"></property>
+        <property name="ValueSerializer">
+            <bean class="com.dengjintian.weibo2rss.misc.RedisSerializer"></bean>
+        </property>
+    </bean>
+
+    <bean id="redisDAO" class="com.dengjintian.weibo2rss.misc.RedisDAO"></bean>
+    <bean class="com.dengjintian.weibo2rss.misc.RedisService"></bean>
+</beans>
