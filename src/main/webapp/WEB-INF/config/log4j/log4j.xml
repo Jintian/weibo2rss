@@ -9,10 +9,10 @@
             <param name="ConversionPattern" value="%p %d{yyyy-MM-dd HH:mm:ss}--%m%n"/>
         </layout>
     </appender>
-    
-	<root>
-		<level value="WARN" />
-		<appender-ref ref="CONSOLE"/>
-	</root>
-	
+
+    <root>
+        <level value="WARN"/>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
 </log4j:configuration>

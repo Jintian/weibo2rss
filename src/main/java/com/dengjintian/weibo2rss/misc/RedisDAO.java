@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import com.dengjintian.weibo2rss.weibo4j.model.Status;
 
 /**
+ * 对redis进行CURD操作. <br/>
  * User: jintian.deng, Date: 8/1/13
  */
 public class RedisDAO {
@@ -20,7 +21,7 @@ public class RedisDAO {
     RedisTemplate<String, Object> redisTemplate;
 
     public List<Object> getUserStatusesByUserId(String userId) {
-        logger.warn(userId + " has " + redisTemplate.opsForList().size(userId) + " statuses!");
+        if (logger.isInfoEnabled()) logger.info(userId + " has " + redisTemplate.opsForList().size(userId) + " statuses!");
         return redisTemplate.opsForList().range(userId, 0, -1);
     }
 
@@ -40,8 +41,8 @@ public class RedisDAO {
         long removeCounter = redisTemplate.opsForList().size(userId) - 200;
         if (removeCounter > 0) {
             for (int i = 0; i <= removeCounter; i++) {
+                redisTemplate.opsForList().rightPop(userId);
             }
-            redisTemplate.opsForList().rightPop(userId);
         }
     }
 

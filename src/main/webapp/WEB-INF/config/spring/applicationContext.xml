@@ -3,20 +3,14 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
-       xmlns:cloud="http://schema.cloudfoundry.org/spring"
        xsi:schemaLocation="
        http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
        http://www.springframework.org/schema/context
        http://www.springframework.org/schema/context/spring-context-3.0.xsd
        http://www.springframework.org/schema/mvc
-       http://www.springframework.org/schema/mvc/spring-mvc.xsd
-       http://schema.cloudfoundry.org/spring
-       http://schema.cloudfoundry.org/spring/cloudfoundry-spring.xsd">
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-    <!--explicitly use cloudfoundry service -->
-    <!--<cloud:properties id="cfoundryEnv"/>-->
-    <!--<context:property-placeholder properties-ref="cfoundryEnv"/>-->
 
     <mvc:resources mapping="/assets/**" location="/assets/" />
 
@@ -45,9 +39,6 @@
 
     <!--redis-->
     <bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
-        <!--<property name="hostName" value="${cloud.services.weibo2rss.connection.hostname}"></property>-->
-        <!--<property name="password" value="${cloud.services.weibo2rss.connection.password}"></property>-->
-        <!--<property name="port" value="${cloud.services.weibo2rss.connection.port}"></property>-->
         <property name="hostName" value="localhost" />
         <property name="port" value="6379" />
     </bean>

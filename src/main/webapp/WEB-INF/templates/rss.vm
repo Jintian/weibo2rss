@@ -15,7 +15,7 @@
         <sy:updatePeriod>hourly</sy:updatePeriod>
         <sy:updateFrequency>1</sy:updateFrequency>
         <generator>http://weibo2rss.cloudfoundry.com</generator>
-        <atom:link href="http://weibo2rss.cloudfoundry.com/generate/$!user.id" rel="self" type="application/rss+xml" />
+        <atom:link href="http://weibo2rss.cloudfoundry.com/rss/$!user.id" rel="self" type="application/rss+xml" />
         <image>
             <url>$!user.avatarLarge</url>
             <title>$!user.screenName @新浪微博</title>

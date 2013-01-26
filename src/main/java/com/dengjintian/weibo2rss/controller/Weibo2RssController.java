@@ -33,6 +33,11 @@ public class Weibo2RssController {
     @Autowired
     RedisService                redisService;
 
+    /**
+     * 欢迎页面.
+     * 
+     * @return
+     */
     @RequestMapping(value = { "/index", "/" })
     public ModelAndView index() {
         ModelAndView modelAndView = new ModelAndView("index");
@@ -65,21 +70,30 @@ public class Weibo2RssController {
     public ModelAndView generateRss(@PathVariable("userId")
     String userId, HttpServletResponse response, HttpServletRequest request) throws IOException {
         if (StringUtils.isBlank(redisService.getAccessToken())) {
+            // 没有通过oauth认证，跳回首页.
             ModelAndView modelAndView = new ModelAndView("redirect:/");
             request.getSession().setAttribute("originalUserId", userId);
             return modelAndView;
         }
 
         response.setContentType("application/rss+xml;charset=UTF-8");
-        ModelAndView modelAndView = new ModelAndView("generate");
+        ModelAndView modelAndView = new ModelAndView("rss");
 
+        // 获取用户最新的微博
         redisService.checkAndUpdateCache(userId);
+
         modelAndView.addObject("statusList", redisService.getStatuses(userId));
         modelAndView.addObject("user", redisService.getUser(userId));
         return modelAndView;
 
     }
 
+    /**
+     * 对首页的表单提交请求进行内部跳转.
+     * 
+     * @param userId
+     * @return
+     */
     @RequestMapping(value = "/generate")
     public ModelAndView formHandling(@RequestParam("userId")
     String userId) {
@@ -87,7 +101,7 @@ public class Weibo2RssController {
     }
 
     /**
-     * weibo oauth认证后回调.
+     * 提供给weibo oauth认证后回调.
      * 
      * @param code
      * @param request
@@ -98,16 +112,18 @@ public class Weibo2RssController {
     String code, HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView();
         try {
+            //获取access token，保存到redis里面
             AccessToken accessTokens = oauth.getAccessTokenByCode(code);
-            logger.warn("accessTokens expires in " + accessTokens.getExpireIn());
+            logger.warn("Get new accessTokens which will be expired in " + accessTokens.getExpireIn());
             redisService.saveAccessToken(accessTokens.getAccessToken());
+
+            //判断是否需要跳转
             String userId = (String) request.getSession().getAttribute("originalUserId");
-            if (!StringUtils.isBlank(userId)) {
-                modelAndView.setView(new RedirectView("generate/" + userId));
-            } else modelAndView.addObject("result", "success!");
+            if (!StringUtils.isBlank(userId)) modelAndView.setView(new RedirectView("rss/" + userId));
+            else modelAndView.addObject("result", "success!");
         } catch (WeiboException e) {
             logger.error("Fail to retrieve accessToken with code(" + code + ")!", e);
-            modelAndView.addObject("result", "fail! \n" + e);
+            modelAndView.addObject("result", "fail!" + e);
         }
         return modelAndView;
     }

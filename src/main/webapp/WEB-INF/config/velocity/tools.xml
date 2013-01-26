@@ -7,8 +7,8 @@
     </tool>
 
     <tool>
-        <key>date</key>
         <scope>application</scope>
+        <key>date</key>
         <class>org.apache.velocity.tools.generic.DateTool</class>
     </tool>
 </toolbox>
