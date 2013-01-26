@@ -66,6 +66,7 @@
     <div class="masthead">
         <ul class="nav nav-pills pull-right">
             <li class="active"><a href="#">Home</a></li>
+            <li><a href="https://github.com/Jintian/weibo2rss">Source</a></li>
             #if($!needOauth == true)
                 <li><a href="/oauth">Oauth授权</a></li>
             #end
