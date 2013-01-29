@@ -133,4 +133,13 @@ public class RedisService implements InitializingBean {
             this.setAccessToken(redisDAO.getAccessToken());
         }
     }
+    public String getUserIdFromDomain(String userId) {
+        try {
+            User user=users.showUserByDomain(userId);
+            return  user.getId();
+        } catch (WeiboException e) {
+            logger.error("Fail to get userId for domain("+userId+")!",e);
+        }
+        return "";
+    }
 }

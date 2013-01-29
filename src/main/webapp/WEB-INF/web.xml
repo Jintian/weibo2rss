@@ -27,6 +27,16 @@
         <param-value>WEB-INF/config/log4j/log4j.xml</param-value>
     </context-param>
 
+    <!-- ip配置 -->
+    <filter>
+        <filter-name>log4jIPFilter</filter-name>
+        <filter-class>com.dengjintian.weibo2rss.controller.Log4jIPFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>log4jIPFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <!--编码配置-->
     <filter>
         <filter-name>characterEncodingFilter</filter-name>

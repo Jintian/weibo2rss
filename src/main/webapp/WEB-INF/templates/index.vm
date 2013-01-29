@@ -66,7 +66,7 @@
     <div class="masthead">
         <ul class="nav nav-pills pull-right">
             <li class="active"><a href="#">Home</a></li>
-            <li><a href="https://github.com/Jintian/weibo2rss">Source</a></li>
+            <li><a href="https://github.com/Jintian/weibo2rss">Source</a>   </li>
             #if($!needOauth == true)
                 <li><a href="/oauth">Oauth授权</a></li>
             #end
@@ -80,12 +80,16 @@
         <h1>$!userCount  Users!</h1>
         <p class="lead">Weibo2rss convert Weibo timeline to RSS.</p>
         <form class="form-inline" action="/generate">
-                <input type="text" placeholder="Your uid" name="userId" />
+                <input type="text" placeholder="Your uid or weibo domain " name="userId" />
                 <button type="submit" class="btn">Generate Your RSS</button>
         </form>
     </div>
 
-
+    <div class="alert alert-info">
+        2013-01-29 <br/>
+        Support domain name as input, e.g.
+        <a href="http://weibo2rss.cloudfoundry.com/rss/jintiandeng">http://weibo2rss.cloudfoundry.com/rss/jintiandeng</a>
+    </div>
 
     <hr>
 

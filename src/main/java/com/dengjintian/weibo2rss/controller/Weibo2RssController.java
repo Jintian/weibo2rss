@@ -80,10 +80,17 @@ public class Weibo2RssController {
         ModelAndView modelAndView = new ModelAndView("rss");
 
         // 获取用户最新的微博
-        redisService.checkAndUpdateCache(userId);
+        if (StringUtils.isNotBlank(userId)) {
+            if (!StringUtils.isNumeric(userId)) {
+                // 是domain id，进行转换
+                userId = redisService.getUserIdFromDomain(userId);
+                if(StringUtils.isBlank(userId)) return modelAndView;
+            }
+            redisService.checkAndUpdateCache(userId);
 
-        modelAndView.addObject("statusList", redisService.getStatuses(userId));
-        modelAndView.addObject("user", redisService.getUser(userId));
+            modelAndView.addObject("statusList", redisService.getStatuses(userId));
+            modelAndView.addObject("user", redisService.getUser(userId));
+        }
         return modelAndView;
 
     }
@@ -112,12 +119,12 @@ public class Weibo2RssController {
     String code, HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView();
         try {
-            //获取access token，保存到redis里面
+            // 获取access token，保存到redis里面
             AccessToken accessTokens = oauth.getAccessTokenByCode(code);
             logger.warn("Get new accessTokens which will be expired in " + accessTokens.getExpireIn());
             redisService.saveAccessToken(accessTokens.getAccessToken());
 
-            //判断是否需要跳转
+            // 判断是否需要跳转
             String userId = (String) request.getSession().getAttribute("originalUserId");
             if (!StringUtils.isBlank(userId)) modelAndView.setView(new RedirectView("rss/" + userId));
             else modelAndView.addObject("result", "success!");
